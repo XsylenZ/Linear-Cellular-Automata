@@ -1,135 +1,153 @@
 #include <iostream>
-#include <string>
 #include <vector>
-#include <sstream>
 
-const uint8_t RULE_A = 122;
-const uint8_t RULE_B = 86;
-
-const uint8_t POS_R = 0;
-const uint8_t POS_L = 1;
-const uint8_t POS_G = 2;
+const uint8_t RULE_A = 0x7A; //01111010
+const uint8_t RULE_B = 0x56; //01010110
 
 struct GenConfig
 {
+    char type = ' ';
     int L = 0;
     int G = 0;
-    uint8_t R = RULE_A;
+    uint16_t rule = 0x00;
+    std::vector<uint8_t> occupiedPositions;
 };
 
 /**
- * Get input tokens from std::cin.
- * @param [in,out] inputTokens
+ * Populates the config with the user input values, according to the following syntax:
+ * [A,B or U <1-255>] L G init_start X[n] init_stop
+ * @param [in,out] config
+ * @return Input failed/succeeded
  */
-std::vector<std::string> getInput();
+bool setConfigFromUserInput( GenConfig& config );
 
 /**
- * Sets parameters from given inputToken to the configuration of initial generation.
- * @param [in] inputTokens
- * @param [in,out] genConfig
- * @return boolean on success
- */
-bool setGenConfig( const std::vector<std::string>& inputTokens, GenConfig& genConfig );
-
-/**
- * Generates the initial generation from the given inputToken.
- * @param [in] inputTokens
+ * Initializes the first generation with the occupiedPositions from the given config
+ * @param [in] config
  * @param [in,out] aGeneration
- * @return boolean on success
  */
-bool initGeneration( const std::vector<std::string>& inputTokens, std::vector<bool>& aGeneration );
+void initGeneration( const GenConfig& config, std::vector<bool>& aGeneration );
 
 /**
- * Print the given generation.
+ * Print the given generation
  * @param [in] aGeneration
  */
 void printGeneration( const std::vector<bool>& aGeneration );
 
 /**
- * Updates given generation to the next generation.
- * @param [in,out] aGeneration
+ * Updates the given generation, with new values, based on the given rule and previous
+ * values of the given generation.
  * @param [in] rule
+ * @param [in,out] aGeneration
  */
-void nextGeneration( std::vector<bool>& aGeneration, uint8_t rule );
+void nextGeneration( uint8_t rule, std::vector<bool>& aGeneration );
 
 int main()
 {
-    std::vector<std::string> inputTokens = getInput();
-
     GenConfig genConfig = {};
-    assert( setGenConfig( inputTokens, genConfig ) );
+    if ( !setConfigFromUserInput( genConfig ) )
+    {
+        return -1;
+    }
 
     std::vector<bool> generation( genConfig.L );
-    assert( initGeneration( inputTokens, generation ) );
+    initGeneration( genConfig, generation );
 
     for ( auto i = 0; i < genConfig.G; ++i )
     {
         printGeneration( generation );
-        nextGeneration( generation, genConfig.R );
+        nextGeneration( genConfig.rule, generation );
     }
 
     return 0;
 }
 
-std::vector<std::string> getInput()
+bool setConfigFromUserInput( GenConfig& config )
 {
-    std::string input;
-    assert( getline( std::cin, input ) );
-
-    std::string buf;
-    std::stringstream ss( input );
-    std::vector<std::string> inputTokens;
-
-    while ( ss >> buf )
-    {
-        inputTokens.push_back( buf );
-    }
-    return inputTokens;
-}
-
-bool setGenConfig( const std::vector<std::string>& inputTokens, GenConfig& genConfig )
-{
-    switch ( inputTokens[POS_R][0] )
+    std::cin >> config.type;
+    switch ( config.type )
     {
         case 'A':
-            genConfig.R = RULE_A;
+            config.rule = RULE_A;
             break;
         case 'B':
-            genConfig.R = RULE_B;
+            config.rule = RULE_B;
             break;
         case 'U':
-            genConfig.R = ( uint8_t ) std::stoi( inputTokens[3] );
+            int ruleU;
+            std::cin >> ruleU;
+            if ( ruleU < 0 || ruleU > 255 )
+            {
+                std::cout << "Argument value for U must be 1 to 255" << std::endl;
+                return false;
+            }
+            config.rule = ( uint8_t ) ruleU;
             break;
         default:
+            std::cout << "Invalid argument for automaton type. Use: A, B or U" << std::endl;
             return false;
     }
 
-    genConfig.L = std::stoi( inputTokens[POS_L] );
-    genConfig.G = std::stoi( inputTokens[POS_G] );
+    std::cin >> config.L >> config.G;
+    if ( config.L < 1 )
+    {
+        std::cout << "Argument for L needs to be a positive integer bigger then 1" << std::endl;
+        return false;
+    }
+    if ( config.G < 1 )
+    {
+        std::cout << "Argument for G needs to be a positive integer bigger then 1" << std::endl;
+        return false;
+    }
+
+    std::string initStart;
+    std::cin >> initStart;
+    if ( initStart != "init_start" )
+    {
+        std::cout << "Invalid argument: \'" << initStart << "\'" << std::endl;
+        return false;
+    }
+
+    int number;
+    //Break when input is not a number anymore, IE 'init_end'
+    while ( std::cin >> number )
+    {
+        if ( number > 1 && number < config.L )
+        {
+            // Minus one, to translate given numbers to index numbers
+            config.occupiedPositions.push_back( number - 1 );
+        }
+    }
+
+    if ( config.occupiedPositions.empty() )
+    {
+        std::cout << "Need at least one occupied position for init generation" << std::endl;
+        return false;
+    }
 
     return true;
 }
 
-bool initGeneration( const std::vector<std::string>& inputTokens, std::vector<bool>& aGeneration )
+void initGeneration( const GenConfig& config, std::vector<bool>& aGeneration )
 {
-    int L = std::stoi( inputTokens[POS_L] );
-    auto it = std::find( inputTokens.begin(), inputTokens.end(), "init_start" );
-    ++it;
-    for ( ; it != inputTokens.end(); ++it )
+    for ( uint8_t occupiedPosition: config.occupiedPositions )
     {
-        if ( *it == "init_end" )
+        if ( occupiedPosition <= config.L )
         {
-            return true;
-        }
-
-        int pos = std::stoi( *it );
-
-        if ( pos <= L )
-        {
-            aGeneration[pos - 1] = true;
+            aGeneration[occupiedPosition] = true;
         }
     }
-    return false;
+}
+
+void nextGeneration( uint8_t rule, std::vector<bool>& aGeneration )
+{
+    std::vector<bool> v;
+    for ( auto it = aGeneration.begin(); it != aGeneration.end(); ++it )
+    {
+        uint8_t pos = 0u | *( it - 1 ) << 2 | *( it ) << 1 | *( it + 1 );
+        v.push_back( ( rule >> pos ) & 1u );
+    }
+    aGeneration = v;
 }
 
 void printGeneration( const std::vector<bool>& aGeneration )
@@ -146,15 +164,4 @@ void printGeneration( const std::vector<bool>& aGeneration )
         }
     }
     std::cout << std::endl;
-}
-
-void nextGeneration( std::vector<bool>& aGeneration, uint8_t rule )
-{
-    std::vector<bool> v;
-    for ( auto it = aGeneration.begin(); it != aGeneration.end(); ++it )
-    {
-        uint8_t pos = 0u | *( it - 1 ) << 2 | *( it ) << 1 | *( it + 1 );
-        v.push_back( ( rule >> pos ) & 1u );
-    }
-    aGeneration = v;
 }
