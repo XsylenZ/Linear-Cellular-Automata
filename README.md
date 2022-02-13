@@ -21,28 +21,154 @@ Syntax:
 [A,B or U \<1 - 255\>] L G init_start [1 or more positive integers] init_end
 
 Type A rule Examples:
-```cpp
+
+Input:
+```c
 A 11 10 init_start 6 init_end
-A 100 50 init_start 10 50 90 init_end
+```
+Result:
+```asm
+     *     
+    * *    
+   * * *   
+  * * * *  
+ * * * * * 
+* * * * * *
+ * * * * * 
+* * * * * *
+ * * * * * 
+* * * * * *
+```
+Input:
+```c
+A 70 10 init_start 10 11 12 13 14 15 16 17 18 19 20 30 31 32 33 34 35 36 37 38 39 40 50 51 52 
+53 54 55 56 57 58 59 60  init_end
+```
+Result:
+```asm
+         ***********         ***********         ***********          
+        **         **       **         **       **         **         
+       ****       ****     ****       ****     ****       ****        
+      **  **     **  **   **  **     **  **   **  **     **  **      *
+     ********   ******** ********   ******** ********   ********    **
+    **      ** **      ***      ** **      ***      ** **      **  ** 
+   ****    *******    ** **    *******    ** **    *******    ********
+  **  **  **     **  *******  **     **  *******  **     **  **       
+ ************   ******     ******   ******     ******   ********     *
+**          ** **    **   **    ** **    **   **    ** **      **   ** 
 ```
 An automaton of type A has the following fixed rule set:
 - If a cell is currently occupied, it remains occupied only if exactly one neighbor is occupied.
 - If a cell is currently empty, it remains empty only if both neighbors are empty.
 
 Type B rule Examples:
-```cpp
+
+Input:
+```c
 B 61 20 init_start 20 40 init_end
-B 104 50 init_start 35 51 83 init_end
+```
+Result:
+```asm
+                   *                   *                     
+                  ***                 ***                    
+                 *  **               *  **                   
+                **** **             **** **                  
+               *   *  **           *   *  **                 
+              *** **** **         *** **** **                
+             *  *    *  **       *  *    *  **               
+            ******  **** **     ******  **** **              
+           *     ***   *  **   *     ***   *  **             
+          ***   *  ** **** ** ***   *  ** **** **            
+         *  ** **** *    *  *   ** **** *    *  **           
+        **** *    * **  ****** * *    * **  **** **          
+       *   * **  **  ***     * * **  **  ***   *  **         
+      *** **  *** ***  **   ** *  *** ***  ** **** **        
+     *  *  ***  *   *** ** * * ***  *   *** *    *  **       
+    *******  ***** *  *  * * *   ***** *  * **  **** **      
+   *      ***    * ******* * ** *    * ****  ***   *  **     
+  ***    *  **  **       * *  * **  **    ***  ** **** **    
+ *  **  **** *** **     ** ****  *** **  *  *** *    *  **   
+**** ***   *   *  **   * *    ***  *  ******  * **  **** **  
+```
+Input:
+```c
+B 104 21 init_start 35 51 83 init_end
+```
+Result:
+```asm
+                                  *               *                               *                     
+                                 ***             ***                             ***                    
+                                *  **           *  **                           *  **                   
+                               **** **         **** **                         **** **                  
+                              *   *  **       *   *  **                       *   *  **                 
+                             *** **** **     *** **** **                     *** **** **                
+                            *  *    *  **   *  *    *  **                   *  *    *  **               
+                           ******  **** ** ******  **** **                 ******  **** **              
+                          *     ***   *  *      ***   *  **               *     ***   *  **             
+                         ***   *  ** ******    *  ** **** **             ***   *  ** **** **            
+                        *  ** **** *      **  **** *    *  **           *  ** **** *    *  **           
+                       **** *    * **    * ***   * **  **** **         **** *    * **  **** **          
+                      *   * **  **  **  **   ** **  ***   *  **       *   * **  **  ***   *  **         
+                     *** **  *** *** *** ** * *  ***  ** **** **     *** **  *** ***  ** **** **        
+                    *  *  ***  *   *   *  * * ***  *** *    *  **   *  *  ***  *   *** *    *  **       
+                   *******  ***** *** ***** *   ***  * **  **** ** *******  ***** *  * **  **** **      
+                  *      ***    *   *     * ** *  ****  ***   *  *       ***    * ****  ***   *  **     
+                 ***    *  **  *** ***   **  * ***   ***  ** ******     *  **  **    ***  ** **** **    
+                *  **  **** ***  *   ** * ****   ** *  *** *      **   **** *** **  *  *** *    *  **   
+               **** ***   *   ***** * * *    ** * * ***  * **    * ** *   *   *  ******  * **  **** **  
+              *   *   ** *** *    * * * **  * * * *   ****  **  **  * ** *** ****     ****  ***   *  ** 
 ```
 An automaton of type B has the following fixed rule set:
 - If a cell is currently occupied, it remains occupied only if the right neighbor is empty.
 - If a cell is currently empty, it becomes occupied if exactly one neighbor is occupied.
 
 Type U rule Examples:
-```cpp
+
+Input:
+```c
 U 90 11 10 init_start 1 6 11 init_end
+```
+Result:
+```asm
+     *     
+    * *    
+   *   *
+  * * * *  
+ *       * 
+* *     * *
+   *   *
+  * * * *  
+ *       * 
+* *     * *
+```
+Input:
+```c
 U 30 50 20 init_start 25 init_end
 ```
+Result:
+```asm
+                        *                         
+                       ***                        
+                      **  *                       
+                     ** ****                      
+                    **  *   *                     
+                   ** **** ***                    
+                  **  *    *  *                   
+                 ** ****  ******                  
+                **  *   ***     *                 
+               ** **** **  *   ***                
+              **  *    * **** **  *               
+             ** ****  ** *    * ****              
+            **  *   ***  **  ** *   *             
+           ** **** **  *** ***  ** ***            
+          **  *    * ***   *  ***  *  *           
+         ** ****  ** *  * *****  *******          
+        **  *   ***  **** *    ***      *         
+       ** **** **  ***    **  **  *    ***        
+      **  *    * ***  *  ** *** ****  **  *       
+     ** ****  ** *  ******  *   *   *** ****
+```
+
 For an automaton of type U (called a universal automaton) the rule set is defined by a table of the following form (where boolean values true and false are used to indicate the occupied and empty state, respectively):
 
 ![Table type U](table_rule_u.png)
