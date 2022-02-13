@@ -18,7 +18,7 @@ Command line examples
 
 Syntax:
 
-[A,B or U] L G [U-Integer] init_start [1 or more positive integers] init_end
+[A,B or U \<1 - 255\>] L G init_start [1 or more positive integers] init_end
 
 Type A rule Examples:
 ```cpp
@@ -31,7 +31,7 @@ An automaton of type A has the following fixed rule set:
 
 Type B rule Examples:
 ```cpp
-B 61 40 init_start 20 40 init_end
+B 61 20 init_start 20 40 init_end
 B 104 50 init_start 35 51 83 init_end
 ```
 An automaton of type B has the following fixed rule set:
@@ -40,8 +40,8 @@ An automaton of type B has the following fixed rule set:
 
 Type U rule Examples:
 ```cpp
-U 11 10 90 init_start 1 6 11 init_end
-U 50 20 30 init_start 25 init_end
+U 90 11 10 init_start 1 6 11 init_end
+U 30 50 20 init_start 25 init_end
 ```
 For an automaton of type U (called a universal automaton) the rule set is defined by a table of the following form (where boolean values true and false are used to indicate the occupied and empty state, respectively):
 
