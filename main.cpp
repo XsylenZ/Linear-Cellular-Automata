@@ -64,6 +64,7 @@ int main()
 
 bool setConfigFromUserInput( GenConfig& config )
 {
+    std::cout << "Enter automaton description:" << std::endl;
     std::cin >> config.type;
     switch ( config.type )
     {
