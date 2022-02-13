@@ -47,3 +47,5 @@ For an automaton of type U (called a universal automaton) the rule set is define
 
 ![Table type U](table_rule_u.png)
 
+Link to the challenge:
+[https://mailing.demcon.com/lp/decode-demcon-linear-cellular-automata](https://mailing.demcon.com/lp/decode-demcon-linear-cellular-automata)
